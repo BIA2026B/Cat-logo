@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumière Wax Melts - Catálogo & Boutique</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Playfair Display & Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: {
+                            50: '#FAF8F5',
+                            100: '#F5EFE6',
+                            200: '#E8DFD8',
+                            300: '#D5C7BC',
+                            400: '#C2B0A2',
+                        },
+                        warm: {
+                            800: '#4A3E3D',
+                            900: '#2E2625',
+                        },
+                        gold: '#D4AF37'
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FAF8F5;
+            color: #4A3E3D;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .serif-title {
+            font-family: 'Playfair Display', serif;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FAF8F5;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #E8DFD8;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #C2B0A2;
+        }
+        .modal-backdrop {
+            background-color: rgba(46, 38, 37, 0.4);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-cream-200">
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="sticky top-0 z-40 bg-cream-50/90 backdrop-blur-md border-b border-cream-200 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo / Title -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="resetFilters()">
+                    <div class="w-10 h-10 rounded-full bg-cream-200 flex items-center justify-center text-warm-800 shadow-sm border border-cream-300">
+                        <i class="fa-solid font-serif text-lg">L</i>
+                    </div>
+                    <div>
+                        <h1 class="serif-title text-2xl font-semibold tracking-wide text-warm-900">LUMIÈRE</h1>
+                        <p class="text-[10px] tracking-widest uppercase text-warm-800 opacity-75">Wax Melts & Home Scents</p>
+                    </div>
+                </div>
+
+                <!-- Admin Mode Toggle & Actions -->
+                <div class="flex items-center space-x-3">
+                    <button id="cartBtn" onclick="toggleCartModal()" class="relative p-2.5 rounded-full bg-cream-100 text-warm-800 hover:bg-cream-200 transition duration-200">
+                        <i class="fa-solid fa-bag-shopping text-lg"></i>
+                        <span id="cartCount" class="hidden absolute -top-1 -right-1 bg-warm-800 text-cream-50 text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
+                    </button>
+
+                    <button id="adminToggleBtn" onclick="toggleAdminMode()" class="flex items-center space-x-2 px-4 py-2 rounded-full border border-warm-800/30 text-warm-800 hover:bg-cream-100 text-xs font-medium tracking-wider uppercase transition duration-200">
+                        <i id="adminToggleIcon" class="fa-solid fa-lock"></i>
+                        <span id="adminToggleText">Modo Admin</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Quick Bar (Hidden by default) -->
+        <div id="adminBar" class="hidden bg-warm-900 text-cream-100 py-2 px-4 border-t border-warm-800">
+            <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between text-xs gap-2">
+                <div class="flex items-center space-x-2">
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="font-medium tracking-wide">MODO EDICIÓN ACTIVO</span>
+                    <span class="opacity-60">| Los cambios se guardan localmente</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="openProductModal()" class="bg-cream-100 text-warm-900 font-semibold px-3 py-1 rounded hover:bg-cream-200 transition">
+                        <i class="fa-solid fa-plus mr-1"></i> Nuevo Producto
+                    </button>
+                    <button onclick="exportCatalogData()" class="bg-warm-800 text-cream-100 px-3 py-1 rounded hover:bg-warm-800/80 transition" title="Guardar respaldo en archivo">
+                        <i class="fa-solid fa-download mr-1"></i> Exportar
+                    </button>
+                    <button onclick="document.getElementById('importInput').click()" class="bg-warm-800 text-cream-100 px-3 py-1 rounded hover:bg-warm-800/80 transition" title="Cargar desde archivo">
+                        <i class="fa-solid fa-upload mr-1"></i> Importar
+                    </button>
+                    <input type="file" id="importInput" class="hidden" accept=".json" onchange="importCatalogData(event)">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="bg-cream-100/60 border-b border-cream-200 py-12 px-4 text-center relative overflow-hidden">
+        <div class="max-w-3xl mx-auto relative z-10">
+            <span class="text-xs uppercase tracking-[0.25em] text-warm-800 font-medium mb-2 block opacity-80">Artesanía Aromática</span>
+            <h2 class="serif-title text-3xl sm:text-4xl md:text-5xl font-normal text-warm-900 mb-4 leading-tight">
+                Transforma tu espacio con fragancias inolvidables
+            </h2>
+            <p class="text-sm sm:text-base text-warm-800/80 max-w-xl mx-auto font-light leading-relaxed">
+                Descubre nuestra colección exclusiva de wax melts, pebeteros de cerámica, placas aromáticas y bouquets creados a mano.
+            </p>
+        </div>
+        <div class="absolute -bottom-12 -left-12 w-48 h-48 rounded-full bg-cream-200/40 blur-2xl pointer-events-none"></div>
+        <div class="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-cream-300/30 blur-3xl pointer-events-none"></div>
+    </section>
+
+    <!-- CATEGORIES NAV & SEARCH -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <!-- Search & Filter Controls -->
+        <div class="flex flex-col md:flex-row gap-4 items-center justify-between mb-8">
+            
+            <!-- Category Tabs -->
+            <div class="w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-none flex items-center space-x-2 border-b md:border-b-0 border-cream-200">
+                <button onclick="filterCategory('all')" data-category="all" class="category-btn px-4 py-2 rounded-full text-xs font-medium tracking-wider uppercase whitespace-nowrap transition-all duration-200 bg-warm-800 text-cream-50 shadow-sm">
+                    Todos
+                </button>
+                <button onclick="filterCategory('pebeteros')" data-category="pebeteros" class="category-btn px-4 py-2 rounded-full text-xs font-medium tracking-wider uppercase whitespace-nowrap transition-all duration-200 bg-cream-100 text-warm-800 hover:bg-cream-200">
+                    Pebeteros
+                </button>
+                <button onclick="filterCategory('placas')" data-category="placas" class="category-btn px-4 py-2 rounded-full text-xs font-medium tracking-wider uppercase whitespace-nowrap transition-all duration-200 bg-cream-100 text-warm-800 hover:bg-cream-200">
+                    Placas Aromáticas
+                </button>
+                <button onclick="filterCategory('bouquets')" data-category="bouquets" class="category-btn px-4 py-2 rounded-full text-xs font-medium tracking-wider uppercase whitespace-nowrap transition-all duration-200 bg-cream-100 text-warm-800 hover:bg-cream-200">
+                    Bouquets
+                </button>
+                <button onclick="filterCategory('melts')" data-category="melts" class="category-btn px-4 py-2 rounded-full text-xs font-medium tracking-wider uppercase whitespace-nowrap transition-all duration-200 bg-cream-100 text-warm-800 hover:bg-cream-200">
+                    Wax Melts
+                </button>
+                <button onclick="filterCategory('figuras')" data-category="figuras" class="category-btn px-4 py-2 rounded-full text-xs font-medium tracking-wider uppercase whitespace-nowrap transition-all duration-200 bg-cream-100 text-warm-800 hover:bg-cream-200">
+                    Figuras Especiales
+                </button>
+                <button onclick="filterCategory('aromas')" data-category="aromas" class="category-btn px-4 py-2 rounded-full text-xs font-medium tracking-wider uppercase whitespace-nowrap transition-all duration-200 bg-cream-100 text-warm-800 hover:bg-cream-200">
+                    Guía de Aromas
+                </button>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="relative w-full md:w-64 shrink-0">
+                <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Buscar producto o aroma..." class="w-full bg-cream-100 border border-cream-200 rounded-full py-2 pl-10 pr-4 text-xs text-warm-900 placeholder-warm-800/50 focus:outline-none focus:border-warm-800 transition">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-warm-800/50 text-xs"></i>
+            </div>
+        </div>
+
+        <!-- PRODUCT GRID -->
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Dynamic Products Injected Here -->
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div id="emptyState" class="hidden py-16 text-center">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-cream-100 flex items-center justify-center text-warm-800/40">
+                <i class="fa-solid fa-wind text-2xl"></i>
+            </div>
+            <h3 class="serif-title text-xl text-warm-900 mb-1">No se encontraron productos</h3>
+            <p class="text-xs text-warm-800/70">Intenta buscar con otros términos o cambia la categoría seleccionada.</p>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-cream-100 border-t border-cream-200 mt-16 py-10 px-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-6">
+            <div>
+                <h3 class="serif-title text-lg font-semibold text-warm-900">LUMIÈRE</h3>
+                <p class="text-xs text-warm-800/70 mt-1">Cera vegetal y esencias de alta perfumería para tu hogar.</p>
+            </div>
+            <div class="text-xs text-warm-800/60">
+                <p>&copy; <span id="yearSpan"></span> Lumière Wax Melts. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- PRODUCT MODAL (Add / Edit) -->
+    <div id="productModal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-cream-50 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-cream-200 relative my-8">
+            <button onclick="closeProductModal()" class="absolute top-4 right-4 text-warm-800/50 hover:text-warm-900 p-2">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <h3 id="modalTitle" class="serif-title text-2xl font-semibold text-warm-900 mb-6 border-b border-cream-200 pb-3">Nuevo Producto</h3>
+
+            <form id="productForm" onsubmit="saveProduct(event)" class="space-y-4">
+                <input type="hidden" id="productId">
+
+                <div>
+                    <label class="block text-xs font-semibold text-warm-900 uppercase tracking-wider mb-1">Nombre del Producto *</label>
+                    <input type="text" id="prodName" required placeholder="Ej. Pebetero Cerámica Minimal" class="w-full bg-cream-100 border border-cream-200 rounded-lg p-2.5 text-xs text-warm-900 focus:outline-none focus:border-warm-800">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-warm-900 uppercase tracking-wider mb-1">Categoría *</label>
+                        <select id="prodCategory" required class="w-full bg-cream-100 border border-cream-200 rounded-lg p-2.5 text-xs text-warm-900 focus:outline-none focus:border-warm-800">
+                            <option value="pebeteros">Pebeteros</option>
+                            <option value="placas">Placas Aromáticas</option>
+                            <option value="bouquets">Bouquets</option>
+                            <option value="melts">Wax Melts</option>
+                            <option value="figuras">Figuras Especiales</option>
+                            <option value="aromas">Guía de Aromas</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-warm-900 uppercase tracking-wider mb-1">Precio ($ COP) *</label>
+                        <input type="number" id="prodPrice" required placeholder="35000" min="0" step="500" class="w-full bg-cream-100 border border-cream-200 rounded-lg p-2.5 text-xs text-warm-900 focus:outline-none focus:border-warm-800">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-warm-900 uppercase tracking-wider mb-1">Perfil Aromático / Notas</label>
+                    <input type="text" id="prodNotes" placeholder="Ej. Vainilla, Lavanda & Almizcle" class="w-full bg-cream-100 border border-cream-200 rounded-lg p-2.5 text-xs text-warm-900 focus:outline-none focus:border-warm-800">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-warm-900 uppercase tracking-wider mb-1">Descripción</label>
+                    <textarea id="prodDesc" rows="3" placeholder="Detalles de elaboración, peso, duración o uso..." class="w-full bg-cream-100 border border-cream-200 rounded-lg p-2.5 text-xs text-warm-900 focus:outline-none focus:border-warm-800"></textarea>
+                </div>
+
+                <!-- Image Source Options -->
+                <div>
+                    <label class="block text-xs font-semibold text-warm-900 uppercase tracking-wider mb-1">Imagen del Producto</label>
+                    <div class="flex items-center space-x-2 mb-2 text-xs">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="imgSource" value="url" checked onchange="toggleImgInput('url')" class="accent-warm-800">
+                            <span class="ml-1 text-warm-800">URL Web</span>
+                        </label>
+                        <label class="inline-flex items-center ml-4">
+                            <input type="radio" name="imgSource" value="file" onchange="toggleImgInput('file')" class="accent-warm-800">
+                            <span class="ml-1 text-warm-800">Subir foto desde dispositivo</span>
+                        </label>
+                    </div>
+
+                    <div id="urlInputGroup">
+                        <input type="url" id="prodImgUrl" placeholder="https://images.unsplash.com/..." class="w-full bg-cream-100 border border-cream-200 rounded-lg p-2.5 text-xs text-warm-900 focus:outline-none focus:border-warm-800">
+                    </div>
+
+                    <div id="fileInputGroup" class="hidden">
+                        <input type="file" id="prodImgFile" accept="image/*" onchange="previewFileImage(this)" class="w-full text-xs text-warm-800 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-cream-200 file:text-warm-900 hover:file:bg-cream-300">
+                    </div>
+                    <input type="hidden" id="imageBase64">
+                </div>
+
+                <div class="flex items-center space-x-2 pt-2">
+                    <input type="checkbox" id="prodInStock" checked class="rounded border-cream-300 accent-warm-800">
+                    <label for="prodInStock" class="text-xs font-medium text-warm-900">Producto Disponible (En Stock)</label>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t border-cream-200">
+                    <button type="button" onclick="closeProductModal()" class="px-4 py-2 rounded-lg text-xs font-medium border border-cream-300 text-warm-800 hover:bg-cream-100">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 rounded-lg text-xs font-medium bg-warm-800 text-cream-50 hover:bg-warm-900 transition">Guardar Producto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CART / ORDER MODAL -->
+    <div id="cartModal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-cream-50 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-cream-200 relative my-8">
+            <button onclick="toggleCartModal()" class="absolute top-4 right-4 text-warm-800/50 hover:text-warm-900 p-2">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <h3 class="serif-title text-2xl font-semibold text-warm-900 mb-2">Tu Pedido</h3>
+            <p class="text-xs text-warm-800/70 mb-4 border-b border-cream-200 pb-3">Revisa tus artículos seleccionados antes de enviar tu pedido por WhatsApp.</p>
+
+            <div id="cartItemsList" class="max-h-60 overflow-y-auto divide-y divide-cream-200 my-4 pr-1">
+                <!-- Cart items rendered here -->
+            </div>
+
+            <div class="border-t border-cream-200 pt-3 space-y-2">
+                <div class="flex justify-between items-center text-sm font-semibold text-warm-900">
+                    <span>Total Estimado:</span>
+                    <span id="cartTotal" class="text-base">$0</span>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-warm-800 mb-1">Nombre o Notas adicionales:</label>
+                    <input type="text" id="customerNotes" placeholder="Ej. Mi nombre es Laura. Entrega en Bogotá." class="w-full bg-cream-100 border border-cream-200 rounded-lg p-2 text-xs text-warm-900 focus:outline-none">
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <button onclick="sendWhatsAppOrder()" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white py-3 rounded-xl font-medium text-xs tracking-wider uppercase flex items-center justify-center space-x-2 shadow-md transition">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    <span>Enviar Pedido a WhatsApp</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT APPLICATION LOGIC -->
+    <script>
+        // Number Formatting (COP Currency)
+        const formatCurrency = (amount) => {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                maximumFractionDigits: 0
+            }).format(amount);
+        };
+
+        // Initial Sample Data (Default Products)
+        const initialProducts = [
+            {
+                id: '1',
+                name: 'Pebetero Cerámica Boho White',
+                category: 'pebeteros',
+                price: 45000,
+                notes: 'Diseño minimalista con acabado mate',
+                desc: 'Pebetero artesanal de cerámica blanca de alta temperatura. Ideal para quemar tus wax melts favoritos de forma uniforme y segura.',
+                img: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80',
+                inStock: true
+            },
+            {
+                id: '2',
+                name: 'Placa Aromática Lavanda & Flor Silvestre',
+                category: 'placas',
+                price: 22000,
+                notes: 'Lavanda Francesa, Camomila & Eucalipto',
+                desc: 'Placa de cera botánica decorada a mano con flores secas. Perfecta para aromatizar armarios, cajones o espacios pequeños.',
+                img: 'https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=800&q=80',
+                inStock: true
+            },
+            {
+                id: '3',
+                name: 'Bouquet Botánico Cera de Soja',
+                category: 'bouquets',
+                price: 38000,
+                notes: 'Rosa Silvestre, Peonía & Té Blanco',
+                desc: 'Arreglo de flores esculpidas en cera vegetal aromatizada. Una pieza decorativa única que desprende aroma sutil aún en frío.',
+                img: 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=800&q=80',
+                inStock: true
+            },
+            {
+                id: '4',
+                name: 'Wax Melts Tableta Vanilla Bourbon',
+                category: 'melts',
+                price: 18000,
+                notes: 'Vainilla Orgánica, Caramelo & Tonka',
+                desc: 'Tableta de cera de soja con 6 cubos fáciles de fraccionar. Proporciona más de 40 horas de fragancia dulce y acogedora.',
+                img: 'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=800&q=80',
+                inStock: true
+            },
+            {
+                id: '5',
+                name: 'Corazones & Estrellas Mini Melts',
+                category: 'figuras',
+                price: 15000,
+                notes: 'Canela, Galleta recién horneada & Nuez',
+                desc: 'Bolsita de liencillo con 10 figuras surtidas de cera. Ideales para dosificar y mezclar con otros aromas.',
+                img: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80',
+                inStock: true
+            },
+            {
+                id: '6',
+                name: 'Aroma Signature: Amber & Cashmere',
+                category: 'aromas',
+                price: 20000,
+                notes: 'Ámbar cálido, Cedro, Cashmere & Vainilla',
+                desc: 'Guía y muestra olfativa de nuestro aroma insignia. Nota cálida, elegante y envolvente para momentos de relajación.',
+                img: 'https://images.unsplash.com/photo-1616949755610-8c9bbc08f138?auto=format&fit=crop&w=800&q=80',
+                inStock: true
+            }
+        ];
+
+        // Global State
+        let products = [];
+        let activeCategory = 'all';
+        let searchQuery = '';
+        let isAdminMode = false;
+        let cart = []; // Stores { productId, quantity }
+
+        // WhatsApp Admin Number (Format without + or spaces)
+        const WHATSAPP_NUMBER = '573000000000'; 
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('yearSpan').innerText = new Date().getFullYear();
+            loadProducts();
+            renderProducts();
+            updateCartUI();
+        });
+
+        // Load Products from localStorage or set defaults
+        function loadProducts() {
+            const stored = localStorage.getItem('lumiere_products');
+            if (stored) {
+                try {
+                    products = JSON.parse(stored);
+                } catch (e) {
+                    console.error('Error parsing stored products', e);
+                    products = [...initialProducts];
+                }
+            } else {
+                products = [...initialProducts];
+                saveProductsToStorage();
+            }
+        }
+
+        function saveProductsToStorage() {
+            localStorage.setItem('lumiere_products', JSON.stringify(products));
+        }
+
+        // Category Filter
+        function filterCategory(cat) {
+            activeCategory = cat;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                if (btn.dataset.category === cat) {
+                    btn.className = 'category-btn px-4 py-2 rounded-full text-xs font-medium tracking-wider uppercase whitespace-nowrap transition-all duration-200 bg-warm-800 text-cream-50 shadow-sm';
+                } else {
+                    btn.className = 'category-btn px-4 py-2 rounded-full text-xs font-medium tracking-wider uppercase whitespace-nowrap transition-all duration-200 bg-cream-100 text-warm-800 hover:bg-cream-200';
+                }
+            });
+            renderProducts();
+        }
+
+        // Search Filter
+        function handleSearch() {
+            searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            renderProducts();
+        }
+
+        function resetFilters() {
+            searchQuery = '';
+            document.getElementById('searchInput').value = '';
+            filterCategory('all');
+        }
+
+        // Render Product Cards
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            const emptyState = document.getElementById('emptyState');
+            grid.innerHTML = '';
+
+            const filtered = products.filter(p => {
+                const matchesCat = activeCategory === 'all' || p.category === activeCategory;
+                const matchesSearch = !searchQuery || 
+                    p.name.toLowerCase().includes(searchQuery) || 
+                    (p.notes && p.notes.toLowerCase().includes(searchQuery)) ||
+                    (p.desc && p.desc.toLowerCase().includes(searchQuery));
+                return matchesCat && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'bg-cream-50 rounded-2xl border border-cream-200 overflow-hidden shadow-sm hover:shadow-md transition duration-300 flex flex-col justify-between relative group';
+                
+                // Fallback image
+                const imageSrc = p.img || 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80';
+                
+                const categoryNames = {
+                    pebeteros: 'Pebetero',
+                    placas: 'Placa Aromática',
+                    bouquets: 'Bouquet',
+                    melts: 'Wax Melt',
+                    figuras: 'Figura Especial',
+                    aromas: 'Guía Aromática'
+                };
+
+                card.innerHTML = `
+                    <div>
+                        <!-- Image container -->
+                        <div class="relative aspect-square overflow-hidden bg-cream-100">
+                            <img src="${imageSrc}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                            <span class="absolute top-3 left-3 bg-cream-50/90 backdrop-blur-sm text-warm-900 text-[10px] uppercase font-semibold px-2.5 py-1 rounded-full tracking-wider border border-cream-200">
+                                ${categoryNames[p.category] || p.category}
+                            </span>
+                            ${!p.inStock ? `
+                                <div class="absolute inset-0 bg-cream-50/70 backdrop-blur-[1px] flex items-center justify-center">
+                                    <span class="bg-warm-800 text-cream-50 text-xs font-semibold px-3 py-1.5 rounded-full uppercase tracking-wider">Agotado</span>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Content -->
+                        <div class="p-5">
+                            <h3 class="serif-title text-lg font-medium text-warm-900 mb-1 leading-snug">${p.name}</h3>
+                            ${p.notes ? `
+                                <p class="text-xs text-warm-800/80 font-medium italic mb-2">
+                                    <i class="fa-solid fa-leaf text-[10px] mr-1 text-cream-400"></i> ${p.notes}
+                                </p>
+                            ` : ''}
+                            <p class="text-xs text-warm-800/70 line-clamp-2 leading-relaxed font-light mb-4">${p.desc || ''}</p>
+                        </div>
+                    </div>
+
+                    <!-- Footer / Actions -->
+                    <div class="px-5 pb-5 pt-0 flex items-center justify-between border-t border-cream-100 mt-auto pt-3">
+                        <span class="text-base font-semibold text-warm-900">${formatCurrency(p.price)}</span>
+                        
+                        ${isAdminMode ? `
+                            <div class="flex items-center space-x-1">
+                                <button onclick="editProduct('${p.id}')" class="p-2 rounded-lg bg-cream-100 hover:bg-cream-200 text-warm-900 transition text-xs" title="Editar">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button onclick="deleteProduct('${p.id}')" class="p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 transition text-xs" title="Eliminar">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        ` : `
+                            <button onclick="addToCart('${p.id}')" ${!p.inStock ? 'disabled' : ''} class="px-3.5 py-2 rounded-full bg-cream-200 hover:bg-cream-300 text-warm-900 text-xs font-medium transition flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i class="fa-solid fa-plus text-[10px]"></i>
+                                <span>Agregar</span>
+                            </button>
+                        `}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Toggle Admin / Edit Mode
+        function toggleAdminMode() {
+            if (!isAdminMode) {
+                // Prompt optional passcode for quick protection (Default passcode: 1234 or optional skip)
+                const pass = prompt('Modo Administrador:\nIngresa la contraseña para editar (deja en blanco o escribe 1234):');
+                if (pass === null) return; // Cancelled
+                if (pass !== '' && pass !== '1234') {
+                    alert('Contraseña incorrecta.');
+                    return;
+                }
+                isAdminMode = true;
+            } else {
+                isAdminMode = false;
+            }
+
+            const btnText = document.getElementById('adminToggleText');
+            const btnIcon = document.getElementById('adminToggleIcon');
+            const adminBar = document.getElementById('adminBar');
+
+            if (isAdminMode) {
+                btnText.innerText = 'Salir Edición';
+                btnIcon.className = 'fa-solid fa-unlock text-emerald-600';
+                adminBar.classList.remove('hidden');
+            } else {
+                btnText.innerText = 'Modo Admin';
+                btnIcon.className = 'fa-solid fa-lock';
+                adminBar.classList.add('hidden');
+            }
+
+            renderProducts();
+        }
+
+        // Cart Functionality
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existing = cart.find(item => item.productId === productId);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({ productId, quantity: 1 });
+            }
+
+            updateCartUI();
+            
+            // Temporary button animation / feedback
+            const cartBtn = document.getElementById('cartBtn');
+            cartBtn.classList.add('scale-110');
+            setTimeout(() => cartBtn.classList.remove('scale-110'), 200);
+        }
+
+        function updateCartQuantity(productId, delta) {
+            const item = cart.find(i => i.productId === productId);
+            if (!item) return;
+
+            item.quantity += delta;
+            if (item.quantity <= 0) {
+                cart = cart.filter(i => i.productId !== productId);
+            }
+
+            updateCartUI();
+            renderCartItems();
+        }
+
+        function updateCartUI() {
+            const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const cartCountBadge = document.getElementById('cartCount');
+            
+            if (totalCount > 0) {
+                cartCountBadge.innerText = totalCount;
+                cartCountBadge.classList.remove('hidden');
+            } else {
+                cartCountBadge.classList.add('hidden');
+            }
+        }
+
+        function toggleCartModal() {
+            const modal = document.getElementById('cartModal');
+            if (modal.classList.contains('hidden')) {
+                renderCartItems();
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cartItemsList');
+            const totalEl = document.getElementById('cartTotal');
+            container.innerHTML = '';
+
+            if (cart.length === 0) {
+                container.innerHTML = `<p class="text-center text-xs text-warm-800/60 py-8">Tu carrito de pedido está vacío.</p>`;
+                totalEl.innerText = formatCurrency(0);
+                return;
+            }
+
+            let total = 0;
+
+            cart.forEach(item => {
+                const prod = products.find(p => p.id === item.productId);
+                if (!prod) return;
+
+                const subtotal = prod.price * item.quantity;
+                total += subtotal;
+
+                const row = document.createElement('div');
+                row.className = 'py-3 flex items-center justify-between text-xs';
+                row.innerHTML = `
+                    <div class="flex-1 pr-2">
+                        <p class="font-medium text-warm-900">${prod.name}</p>
+                        <p class="text-[11px] text-warm-800/60">${formatCurrency(prod.price)} c/u</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="updateCartQuantity('${prod.id}', -1)" class="w-6 h-6 rounded bg-cream-200 flex items-center justify-center font-bold text-warm-900 hover:bg-cream-300">-</button>
+                        <span class="font-semibold text-warm-900 w-4 text-center">${item.quantity}</span>
+                        <button onclick="updateCartQuantity('${prod.id}', 1)" class="w-6 h-6 rounded bg-cream-200 flex items-center justify-center font-bold text-warm-900 hover:bg-cream-300">+</button>
+                    </div>
+                    <div class="w-20 text-right font-semibold text-warm-900">
+                        ${formatCurrency(subtotal)}
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+
+            totalEl.innerText = formatCurrency(total);
+        }
+
+        function sendWhatsAppOrder() {
+            if (cart.length === 0) {
+                alert('Agrega al menos un producto al pedido.');
+                return;
+            }
+
+            const notes = document.getElementById('customerNotes').value.trim();
+            let text = `¡Hola! Me gustaría hacer el siguiente pedido de *Lumière Wax Melts*:\n\n`;
+
+            let total = 0;
+            cart.forEach((item, index) => {
+                const prod = products.find(p => p.id === item.productId);
+                if (prod) {
+                    const subtotal = prod.price * item.quantity;
+                    total += subtotal;
+                    text += `${index + 1}. *${prod.name}* x${item.quantity} - ${formatCurrency(subtotal)}\n`;
+                    if(prod.notes) text += `   _Aroma: ${prod.notes}_\n`;
+                }
+            });
+
+            text += `\n*Total a Pagar:* ${formatCurrency(total)}\n`;
+            if (notes) {
+                text += `*Notas:* ${notes}\n`;
+            }
+            text += `\nQuedo atento(a) para coordinar el pago y envío. ¡Gracias!`;
+
+            const encodedText = encodeURIComponent(text);
+            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // Product Modal Handlers (Add / Edit)
+        function openProductModal(prodId = null) {
+            const modal = document.getElementById('productModal');
+            const form = document.getElementById('productForm');
+            const title = document.getElementById('modalTitle');
+            
+            form.reset();
+            document.getElementById('imageBase64').value = '';
+            toggleImgInput('url');
+
+            if (prodId) {
+                title.innerText = 'Editar Producto';
+                const p = products.find(item => item.id === prodId);
+                if (p) {
+                    document.getElementById('productId').value = p.id;
+                    document.getElementById('prodName').value = p.name;
+                    document.getElementById('prodCategory').value = p.category;
+                    document.getElementById('prodPrice').value = p.price;
+                    document.getElementById('prodNotes').value = p.notes || '';
+                    document.getElementById('prodDesc').value = p.desc || '';
+                    document.getElementById('prodImgUrl').value = p.img || '';
+                    document.getElementById('prodInStock').checked = p.inStock !== false;
+                }
+            } else {
+                title.innerText = 'Nuevo Producto';
+                document.getElementById('productId').value = '';
+                document.getElementById('prodInStock').checked = true;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('productModal').classList.add('hidden');
+        }
+
+        function toggleImgInput(type) {
+            const urlGroup = document.getElementById('urlInputGroup');
+            const fileGroup = document.getElementById('fileInputGroup');
+            if (type === 'url') {
+                urlGroup.classList.remove('hidden');
+                fileGroup.classList.add('hidden');
+            } else {
+                urlGroup.classList.add('hidden');
+                fileGroup.classList.remove('hidden');
+            }
+        }
+
+        function previewFileImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('imageBase64').value = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function saveProduct(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('productId').value || Date.now().toString();
+            const name = document.getElementById('prodName').value.trim();
+            const category = document.getElementById('prodCategory').value;
+            const price = parseFloat(document.getElementById('prodPrice').value) || 0;
+            const notes = document.getElementById('prodNotes').value.trim();
+            const desc = document.getElementById('prodDesc').value.trim();
+            const inStock = document.getElementById('prodInStock').checked;
+
+            // Determine image source
+            const imgSourceType = document.querySelector('input[name="imgSource"]:checked').value;
+            let img = '';
+            if (imgSourceType === 'url') {
+                img = document.getElementById('prodImgUrl').value.trim();
+            } else {
+                img = document.getElementById('imageBase64').value;
+            }
+
+            const existingIndex = products.findIndex(p => p.id === id);
+            const productData = { id, name, category, price, notes, desc, img, inStock };
+
+            if (existingIndex >= 0) {
+                // Update
+                products[existingIndex] = productData;
+            } else {
+                // Add new
+                products.unshift(productData);
+            }
+
+            saveProductsToStorage();
+            renderProducts();
+            closeProductModal();
+        }
+
+        function editProduct(id) {
+            openProductModal(id);
+        }
+
+        function deleteProduct(id) {
+            if (confirm('¿Estás seguro de que deseas eliminar este producto del catálogo?')) {
+                products = products.filter(p => p.id !== id);
+                saveProductsToStorage();
+                renderProducts();
+            }
+        }
+
+        // Import & Export JSON Catalog Data
+        function exportCatalogData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `catalogo_lumiere_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importCatalogData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        products = imported;
+                        saveProductsToStorage();
+                        renderProducts();
+                        alert('Catálogo importado exitosamente.');
+                    } else {
+                        alert('El archivo no tiene el formato correcto.');
+                    }
+                } catch (err) {
+                    alert('Error al leer el archivo JSON.');
+                }
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>
